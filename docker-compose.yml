@@ -1,0 +1,93 @@
+services:
+  postgresAuth:
+    image: postgres:16-alpine
+    container_name: auth-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+    ports:
+      - "8090:5432"
+    volumes:
+      - postgres_data_auth:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U auth-d auth" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  postgresProduct:
+    image: postgres:16-alpine
+    container_name: product-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: product
+      POSTGRES_USER: product
+      POSTGRES_PASSWORD: product
+    ports:
+      - "8091:5432"
+    volumes:
+      - postgres_data_product:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U product-d product" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  postgresSales:
+    image: postgres:16-alpine
+    container_name: sales-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sales
+      POSTGRES_USER: sales
+      POSTGRES_PASSWORD: sales
+    ports:
+      - "8092:5432"
+    volumes:
+      - postgres_data_sales:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U sales-d sales" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  postgresInventory:
+    image: postgres:16-alpine
+    container_name: inventory-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inventory
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory
+    ports:
+      - "8093:5432"
+    volumes:
+      - postgres_data_inventory:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U inventory-d inventory" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  postgresNotification:
+    image: postgres:16-alpine
+    container_name: notification-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: notification
+      POSTGRES_USER: notification
+      POSTGRES_PASSWORD: notification
+    ports:
+      - "8094:5432"
+    volumes:
+      - postgres_data_notification:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U notification-d notification" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_data_auth:
+  postgres_data_product:
+  postgres_data_sales:
+  postgres_data_inventory:
+  postgres_data_notification:
+

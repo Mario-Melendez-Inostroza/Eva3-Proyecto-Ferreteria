@@ -1,0 +1,181 @@
+# =============================================================
+# docker-compose.yml — Ferretería Microservicios
+# =============================================================
+#
+# ARQUITECTURA:
+#
+#   [Frontend / Postman]
+#          ↓ Puerto 8080
+#     bff-service          ← único punto de entrada público
+#      ↓    ↓    ↓    ↓    ↓
+#   ms-auth  ms-product  ms-inventory  ms-sales  ms-notification
+#      ↓         ↓            ↓           ↓            ↓
+#                    PostgreSQL (5432)
+#
+# PUERTOS:
+#   8080 → bff-service      (público)
+#   8081 → ms-auth          (interno)
+#   8082 → ms-product       (interno)
+#   8083 → ms-inventory     (interno)
+#   8084 → ms-sales         (interno)
+#   8085 → ms-notification  (interno)
+#   5432 → PostgreSQL       (desarrollo)
+#
+# =============================================================
+
+services:
+
+  # -----------------------------------------------------------
+  # POSTGRESQL
+  # -----------------------------------------------------------
+  postgres:
+    image: postgres:16
+    container_name: postgres-ferreteria
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres1234
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # -----------------------------------------------------------
+  # MS-AUTH — Autenticación y JWT (Puerto 8081)
+  # -----------------------------------------------------------
+  ms-auth:
+    build: ./ms-auth
+    container_name: ms-auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: auth_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres1234
+      JWT_SECRET: "ferreteria-secret-key-super-segura-2024-minimo-32-chars"
+      JWT_EXPIRATION: 3600000
+    ports:
+      - "8081:8081"
+
+  # -----------------------------------------------------------
+  # MS-PRODUCT — Catálogo de Productos (Puerto 8082)
+  # -----------------------------------------------------------
+  ms-product:
+    build: ./ms-product
+    container_name: ms-product
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: product_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres1234
+    ports:
+      - "8082:8082"
+
+  # -----------------------------------------------------------
+  # MS-INVENTORY — Stock por Producto y Bodega (Puerto 8083)
+  # -----------------------------------------------------------
+  ms-inventory:
+    build: ./ms-inventory
+    container_name: ms-inventory
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: inventory_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres1234
+      # URL del ms-product para validar que el producto existe
+      PRODUCT_SERVICE_URL: http://ms-product:8082
+    ports:
+      - "8083:8083"
+
+  # -----------------------------------------------------------
+  # MS-SALES — Ventas (Puerto 8084)
+  # -----------------------------------------------------------
+  # Al registrar una venta:
+  #   1. Verifica que el producto existe en ms-product
+  #   2. Descuenta el stock en ms-inventory
+  #   3. Notifica a ms-notification si el stock queda bajo
+  # -----------------------------------------------------------
+  ms-sales:
+    build: ./ms-sales
+    container_name: ms-sales
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sales_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres1234
+      PRODUCT_SERVICE_URL: http://ms-product:8082
+      INVENTORY_SERVICE_URL: http://ms-inventory:8083
+      NOTIFICATION_SERVICE_URL: http://ms-notification:8085
+    ports:
+      - "8084:8084"
+
+  # -----------------------------------------------------------
+  # MS-NOTIFICATION — Alertas y Notificaciones (Puerto 8085)
+  # -----------------------------------------------------------
+  # Recibe alertas de stock bajo y las registra.
+  # En producción enviaría emails reales.
+  # -----------------------------------------------------------
+  ms-notification:
+    build: ./ms-notification
+    container_name: ms-notification
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: notification_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres1234
+    ports:
+      - "8085:8085"
+
+  # -----------------------------------------------------------
+  # BFF-SERVICE — Backend For Frontend (Puerto 8080)
+  # -----------------------------------------------------------
+  # Único servicio público. Coordina todos los microservicios.
+  # Valida JWT con ms-auth antes de reenviar requests.
+  # -----------------------------------------------------------
+  bff-service:
+    build: ./bff-service
+    container_name: bff-service
+    depends_on:
+      - ms-auth
+      - ms-product
+      - ms-inventory
+      - ms-sales
+      - ms-notification
+    environment:
+      AUTH_SERVICE_URL: http://ms-auth:8081
+      PRODUCT_SERVICE_URL: http://ms-product:8082
+      INVENTORY_SERVICE_URL: http://ms-inventory:8083
+      SALES_SERVICE_URL: http://ms-sales:8084
+      NOTIFICATION_SERVICE_URL: http://ms-notification:8085
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
