@@ -16,8 +16,20 @@ public class GlobalExceptionHandler {
                 .body(Map.of("status", 404, "message", ex.getMessage()));
     }
 
+    @ExceptionHandler(SaleNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSaleNotFound(SaleNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("status", 404, "message", ex.getMessage()));
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, Object>> handleBusiness(BusinessException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("status", 409, "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientStock(InsufficientStockException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("status", 409, "message", ex.getMessage()));
     }

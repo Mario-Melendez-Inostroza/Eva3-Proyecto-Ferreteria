@@ -3,12 +3,15 @@ package com.ferreteria.mssales.service;
 import com.ferreteria.mssales.client.*;
 import com.ferreteria.mssales.dto.*;
 import com.ferreteria.mssales.exception.BusinessException;
+import com.ferreteria.mssales.exception.InsufficientStockException;
 import com.ferreteria.mssales.exception.ResourceNotFoundException;
+import com.ferreteria.mssales.exception.SaleNotFoundException;
 import com.ferreteria.mssales.model.Venta;
 import com.ferreteria.mssales.repository.VentaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +31,7 @@ public class VentaServiceImpl implements VentaService {
     // ==========================================================
     // 1. Verifica que el producto existe en ms-product
     // 2. Descuenta el stock en ms-inventory
-    //    (ms-inventory lanza excepción si no hay suficiente)
+    // (ms-inventory lanza excepción si no hay suficiente)
     // 3. Guarda la venta en la BD
     // 4. Si el stock quedó bajo → notifica a ms-notification
     // 5. Notifica la venta registrada a ms-notification
@@ -54,6 +57,9 @@ public class VentaServiceImpl implements VentaService {
         InventoryDto inventarioActualizado;
         try {
             inventarioActualizado = inventoryClient.descontarStock(dto.productId(), dto.cantidad());
+        } catch (HttpClientErrorException.Conflict e) {
+            throw new InsufficientStockException(
+                    "Stock insuficiente para producto: " + dto.productId());
         } catch (Exception e) {
             throw new BusinessException(
                     "No se pudo descontar el stock: " + e.getMessage());
@@ -68,14 +74,14 @@ public class VentaServiceImpl implements VentaService {
                 .cliente(dto.cliente())
                 .build());
 
-        // PASO 4: Notificar si el stock quedó bajo (de forma segura, sin romper la venta)
+        // PASO 4: Notificar si el stock quedó bajo (de forma segura, sin romper la
+        // venta)
         try {
             if (inventarioActualizado.stockBajo()) {
                 notificationClient.notificarStockBajo(
                         dto.productId(),
                         producto.nombre(),
-                        inventarioActualizado.stock()
-                );
+                        inventarioActualizado.stock());
             }
             // PASO 5: Notificar venta registrada
             notificationClient.notificarVenta(dto.productId(), producto.nombre(), dto.cantidad());
@@ -88,18 +94,26 @@ public class VentaServiceImpl implements VentaService {
         return new VentaResponseDto(
                 venta.getId(), venta.getProductId(), producto.nombre(),
                 venta.getCantidad(), venta.getPrecioUnit(),
-                venta.getTotal(), venta.getCliente(), venta.getCreatedAt()
-        );
+                venta.getTotal(), venta.getCliente(), venta.getCreatedAt());
     }
 
     @Override
     public List<VentaResponseDto> listarTodas() {
         return ventaRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(v -> new VentaResponseDto(
-                        v.getId(), v.getProductId(), null,
-                        v.getCantidad(), v.getPrecioUnit(),
-                        v.getTotal(), v.getCliente(), v.getCreatedAt()))
+                .map(v -> {
+                    ProductDto producto = productClient.buscarProducto(v.getProductId());
+
+                    return new VentaResponseDto(
+                            v.getId(),
+                            v.getProductId(),
+                            producto.nombre(),
+                            v.getCantidad(),
+                            v.getPrecioUnit(),
+                            v.getTotal(),
+                            v.getCliente(),
+                            v.getCreatedAt());
+                })
                 .toList();
     }
 
@@ -107,28 +121,43 @@ public class VentaServiceImpl implements VentaService {
     public List<VentaResponseDto> listarPorProducto(UUID productId) {
         return ventaRepository.findByProductIdOrderByCreatedAtDesc(productId)
                 .stream()
-                .map(v -> new VentaResponseDto(
-                        v.getId(), v.getProductId(), null,
-                        v.getCantidad(), v.getPrecioUnit(),
-                        v.getTotal(), v.getCliente(), v.getCreatedAt()))
+                .map(v -> {
+                    ProductDto producto = productClient.buscarProducto(v.getProductId());
+
+                    return new VentaResponseDto(
+                            v.getId(),
+                            v.getProductId(),
+                            producto.nombre(),
+                            v.getCantidad(),
+                            v.getPrecioUnit(),
+                            v.getTotal(),
+                            v.getCliente(),
+                            v.getCreatedAt());
+                })
                 .toList();
     }
 
     @Override
     public VentaResponseDto buscarPorId(UUID id) {
         Venta v = ventaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Venta no encontrada: " + id));
+                .orElseThrow(() -> new SaleNotFoundException("Venta no encontrada: " + id));
+        ProductDto producto = productClient.buscarProducto(v.getProductId());
+
         return new VentaResponseDto(
-                v.getId(), v.getProductId(), null,
-                v.getCantidad(), v.getPrecioUnit(),
-                v.getTotal(), v.getCliente(), v.getCreatedAt());
+                v.getId(),
+                v.getProductId(),
+                producto.nombre(),
+                v.getCantidad(),
+                v.getPrecioUnit(),
+                v.getTotal(),
+                v.getCliente(),
+                v.getCreatedAt());
     }
 
     @Override
     public ResumenVentasDto obtenerResumen() {
         return new ResumenVentasDto(
                 ventaRepository.count(),
-                ventaRepository.sumTotalVentas()
-        );
+                ventaRepository.sumTotalVentas());
     }
 }
