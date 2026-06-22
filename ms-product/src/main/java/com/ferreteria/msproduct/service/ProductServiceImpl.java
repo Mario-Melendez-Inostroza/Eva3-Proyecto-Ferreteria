@@ -1,7 +1,8 @@
 package com.ferreteria.msproduct.service;
 
 import com.ferreteria.msproduct.dto.*;
-import com.ferreteria.msproduct.exception.ResourceNotFoundException;
+import com.ferreteria.msproduct.exception.ProductAlreadyExistsException;
+import com.ferreteria.msproduct.exception.ProductNotFoundException;
 import com.ferreteria.msproduct.model.Product;
 import com.ferreteria.msproduct.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponseDto buscarPorId(UUID id) {
         return toDto(productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id)));
+                .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado: " + id)));
     }
 
     @Override
@@ -46,6 +47,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto crear(ProductRequestDto dto) {
+        if (productRepository.existsByNombre(dto.nombre())) {
+            throw new ProductAlreadyExistsException("El producto ya existe: " + dto.nombre());
+        }
         Product saved = productRepository.save(Product.builder()
                 .nombre(dto.nombre())
                 .descripcion(dto.descripcion())
@@ -58,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponseDto actualizar(UUID id, ProductRequestDto dto) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado: " + id));
         product.setNombre(dto.nombre());
         product.setDescripcion(dto.descripcion());
         product.setPrecio(dto.precio());
@@ -69,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public MessageResponseDto desactivar(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado: " + id));
         product.setActivo(false);
         productRepository.save(product);
         return new MessageResponseDto("Producto desactivado: " + product.getNombre());

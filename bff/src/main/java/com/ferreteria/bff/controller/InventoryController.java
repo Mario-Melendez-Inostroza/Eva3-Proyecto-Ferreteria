@@ -1,7 +1,7 @@
-package com.ferreteria.msinventory.controller;
+package com.ferreteria.bff.controller;
 
-import com.ferreteria.msinventory.dto.*;
-import com.ferreteria.msinventory.service.InventoryService;
+import com.ferreteria.bff.dto.*;
+import com.ferreteria.bff.service.InventoryBffService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/inventory")
+@RequestMapping("/api/inventory")
 @RequiredArgsConstructor
 @Tag(name = "Inventory", description = "Endpoints for inventory management")
 public class InventoryController {
 
-    private final InventoryService inventoryService;
+    private final InventoryBffService inventoryBffService;
 
     @Operation(
             summary = "Create inventory record",
@@ -35,11 +35,13 @@ public class InventoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Inventory record created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid inventory request"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<InventoryResponseDto> crear(@Valid @RequestBody InventoryRequestDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.crear(dto));
+    public ResponseEntity<InventoryResponseDto> create(@Valid @RequestBody InventoryRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(inventoryBffService.create(dto));
     }
 
     @Operation(
@@ -48,11 +50,12 @@ public class InventoryController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Inventory records retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<List<InventoryResponseDto>> listar() {
-        return ResponseEntity.ok(inventoryService.listarTodo());
+    public ResponseEntity<List<InventoryResponseDto>> findAll() {
+        return ResponseEntity.ok(inventoryBffService.findAll());
     }
 
     @Operation(
@@ -61,11 +64,12 @@ public class InventoryController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Low stock inventory records retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/stock-bajo")
-    public ResponseEntity<List<InventoryResponseDto>> stockBajo() {
-        return ResponseEntity.ok(inventoryService.listarStockBajo());
+    public ResponseEntity<List<InventoryResponseDto>> findLowStock() {
+        return ResponseEntity.ok(inventoryBffService.findLowStock());
     }
 
     @Operation(
@@ -75,14 +79,15 @@ public class InventoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Inventory record found"),
             @ApiResponse(responseCode = "400", description = "Invalid product identifier"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token"),
             @ApiResponse(responseCode = "404", description = "Inventory record not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/producto/{productId}")
-    public ResponseEntity<InventoryResponseDto> buscarPorProducto(
+    public ResponseEntity<InventoryResponseDto> findByProduct(
             @Parameter(description = "Product unique identifier", required = true)
             @PathVariable UUID productId) {
-        return ResponseEntity.ok(inventoryService.buscarPorProductId(productId));
+        return ResponseEntity.ok(inventoryBffService.findByProduct(productId));
     }
 
     @Operation(
@@ -96,15 +101,16 @@ public class InventoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stock increased successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid stock adjustment request"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token"),
             @ApiResponse(responseCode = "404", description = "Inventory record not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/producto/{productId}/agregar")
-    public ResponseEntity<InventoryResponseDto> agregarStock(
+    public ResponseEntity<InventoryResponseDto> addStock(
             @Parameter(description = "Product unique identifier", required = true)
             @PathVariable UUID productId,
-            @Valid @RequestBody AjustarStockDto dto) {
-        return ResponseEntity.ok(inventoryService.agregarStock(productId, dto));
+            @Valid @RequestBody StockAdjustmentDto dto) {
+        return ResponseEntity.ok(inventoryBffService.addStock(productId, dto));
     }
 
     @Operation(
@@ -117,15 +123,16 @@ public class InventoryController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stock decreased successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid stock adjustment request or insufficient stock"),
+            @ApiResponse(responseCode = "400", description = "Invalid stock adjustment request"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token"),
             @ApiResponse(responseCode = "404", description = "Inventory record not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/producto/{productId}/descontar")
-    public ResponseEntity<InventoryResponseDto> descontarStock(
+    public ResponseEntity<InventoryResponseDto> subtractStock(
             @Parameter(description = "Product unique identifier", required = true)
             @PathVariable UUID productId,
-            @Valid @RequestBody AjustarStockDto dto) {
-        return ResponseEntity.ok(inventoryService.descontarStock(productId, dto));
+            @Valid @RequestBody StockAdjustmentDto dto) {
+        return ResponseEntity.ok(inventoryBffService.subtractStock(productId, dto));
     }
 }

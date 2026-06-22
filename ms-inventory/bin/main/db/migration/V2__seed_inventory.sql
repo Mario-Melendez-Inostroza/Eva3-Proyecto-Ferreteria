@@ -1,6 +1,0 @@
--- El product_id se completa manualmente después de crear los productos.
--- Para el seed usamos un enfoque con subconsultas al ms-product NO aplica aquí.
--- En su lugar, al crear productos desde la API se debería llamar a ms-inventory para inicializar stock.
--- Este seed pone stock inicial con UUIDs ficticios que deben actualizarse.
--- En producción: el ms-product notificaría al ms-inventory al crear un producto.
--- Para desarrollo se puede insertar directamente via API después de arrancar.

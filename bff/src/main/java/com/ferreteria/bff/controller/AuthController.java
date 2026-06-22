@@ -1,7 +1,7 @@
-package com.ferreteria.msauth.controller;
+package com.ferreteria.bff.controller;
 
-import com.ferreteria.msauth.dto.*;
-import com.ferreteria.msauth.service.AuthService;
+import com.ferreteria.bff.dto.*;
+import com.ferreteria.bff.service.AuthBffService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,16 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication", description = "Endpoints for user registration, login, and token validation")
+@Tag(name = "Authentication", description = "Endpoints for user registration and login")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthBffService authBffService;
 
     @Operation(
-            summary = "Register user",
-            description = "Creates a new user account in the authentication service.",
+            summary = "Register a new user",
+            description = "Creates a new user account by forwarding the registration request to the authentication service.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "User registration data",
                     required = true
@@ -35,12 +35,12 @@ public class AuthController {
     })
     @PostMapping("/register")
     public ResponseEntity<MessageResponseDto> register(@Valid @RequestBody RegisterRequestDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authBffService.register(dto));
     }
 
     @Operation(
-            summary = "Login user",
-            description = "Authenticates user credentials and returns a JWT token.",
+            summary = "Authenticate user",
+            description = "Authenticates a user and returns a JWT token when the credentials are valid.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "User login credentials",
                     required = true
@@ -54,24 +54,6 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto dto) {
-        return ResponseEntity.ok(authService.login(dto));
-    }
-
-    @Operation(
-            summary = "Validate JWT token",
-            description = "Validates a JWT token and returns whether it is valid.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "JWT token validation request",
-                    required = true
-            )
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Token validation completed"),
-            @ApiResponse(responseCode = "400", description = "Invalid validation request"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @PostMapping("/validate")
-    public ResponseEntity<ValidateTokenResponseDto> validate(@Valid @RequestBody ValidateTokenRequestDto dto) {
-        return ResponseEntity.ok(authService.validateToken(dto));
+        return ResponseEntity.ok(authBffService.login(dto));
     }
 }

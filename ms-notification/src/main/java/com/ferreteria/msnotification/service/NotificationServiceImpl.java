@@ -1,7 +1,7 @@
 package com.ferreteria.msnotification.service;
 
 import com.ferreteria.msnotification.dto.*;
-import com.ferreteria.msnotification.exception.ResourceNotFoundException;
+import com.ferreteria.msnotification.exception.NotificationNotFoundException;
 import com.ferreteria.msnotification.model.Notification;
 import com.ferreteria.msnotification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationResponseDto crear(NotificationRequestDto dto) {
-        // En producción aquí también se enviaría un email real
         Notification saved = notificationRepository.save(Notification.builder()
                 .tipo(dto.tipo())
                 .mensaje(dto.mensaje())
@@ -54,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationResponseDto marcarLeida(UUID id) {
         Notification n = notificationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada: " + id));
+                .orElseThrow(() -> new NotificationNotFoundException("Notificacion no encontrada: " + id));
         n.setLeida(true);
         return toDto(notificationRepository.save(n));
     }
@@ -64,6 +63,6 @@ public class NotificationServiceImpl implements NotificationService {
         List<Notification> noLeidas = notificationRepository.findByLeidaFalseOrderByCreatedAtDesc();
         noLeidas.forEach(n -> n.setLeida(true));
         notificationRepository.saveAll(noLeidas);
-        return new MessageResponseDto("Se marcaron " + noLeidas.size() + " notificaciones como leídas");
+        return new MessageResponseDto("Se marcaron " + noLeidas.size() + " notificaciones como leidas");
     }
 }

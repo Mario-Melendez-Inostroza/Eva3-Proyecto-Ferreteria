@@ -1,7 +1,8 @@
 package com.ferreteria.msauth.service;
 
 import com.ferreteria.msauth.dto.*;
-import com.ferreteria.msauth.exception.UnauthorizedException;
+import com.ferreteria.msauth.exception.InvalidCredentialsException;
+import com.ferreteria.msauth.exception.UserAlreadyExistsException;
 import com.ferreteria.msauth.model.User;
 import com.ferreteria.msauth.repository.UserRepository;
 import com.ferreteria.msauth.security.JwtUtil;
@@ -20,7 +21,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public MessageResponseDto register(RegisterRequestDto dto) {
         if (userRepository.existsByUsername(dto.username())) {
-            throw new UnauthorizedException("El usuario ya existe: " + dto.username());
+            throw new UserAlreadyExistsException("El usuario ya existe: " + dto.username());
         }
         userRepository.save(User.builder()
                 .username(dto.username())
@@ -32,9 +33,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto login(LoginRequestDto dto) {
         User user = userRepository.findByUsername(dto.username())
-                .orElseThrow(() -> new UnauthorizedException("Credenciales inválidas"));
+                .orElseThrow(() -> new InvalidCredentialsException("Credenciales invalidas"));
         if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
-            throw new UnauthorizedException("Credenciales inválidas");
+            throw new InvalidCredentialsException("Credenciales invalidas");
         }
         return new AuthResponseDto(jwtUtil.generateToken(user.getUsername()), user.getUsername());
     }

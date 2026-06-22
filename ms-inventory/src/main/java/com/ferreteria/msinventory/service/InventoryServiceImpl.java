@@ -1,8 +1,8 @@
 package com.ferreteria.msinventory.service;
 
 import com.ferreteria.msinventory.dto.*;
-import com.ferreteria.msinventory.exception.ResourceNotFoundException;
-import com.ferreteria.msinventory.exception.StockInsuficienteException;
+import com.ferreteria.msinventory.exception.InsufficientStockException;
+import com.ferreteria.msinventory.exception.InventoryNotFoundException;
 import com.ferreteria.msinventory.model.Inventory;
 import com.ferreteria.msinventory.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public InventoryResponseDto buscarPorProductId(UUID productId) {
         return toDto(inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(
+                .orElseThrow(() -> new InventoryNotFoundException(
                         "Inventario no encontrado para producto: " + productId)));
     }
 
@@ -61,7 +61,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public InventoryResponseDto agregarStock(UUID productId, AjustarStockDto dto) {
         Inventory inv = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(
+                .orElseThrow(() -> new InventoryNotFoundException(
                         "Inventario no encontrado para producto: " + productId));
         inv.setStock(inv.getStock() + dto.cantidad());
         return toDto(inventoryRepository.save(inv));
@@ -70,10 +70,10 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public InventoryResponseDto descontarStock(UUID productId, AjustarStockDto dto) {
         Inventory inv = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(
+                .orElseThrow(() -> new InventoryNotFoundException(
                         "Inventario no encontrado para producto: " + productId));
         if (inv.getStock() < dto.cantidad()) {
-            throw new StockInsuficienteException(
+            throw new InsufficientStockException(
                     "Stock insuficiente. Stock actual: " + inv.getStock()
                     + ", solicitado: " + dto.cantidad());
         }

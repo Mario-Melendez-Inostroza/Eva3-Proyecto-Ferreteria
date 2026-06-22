@@ -1,0 +1,28 @@
+# IDE
+.idea/
+.vscode/
+.junie/
+
+# Gradle
+.gradle/
+**/.gradle/
+
+# Build outputs
+build/
+**/build/
+
+bin/
+**/bin/
+
+out/
+**/out/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
