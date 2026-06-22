@@ -26,3 +26,6 @@ Thumbs.db
 
 # Java
 *.class
+*.jar
+build/
+**/build/
