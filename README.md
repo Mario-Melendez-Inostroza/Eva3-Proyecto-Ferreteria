@@ -36,7 +36,7 @@ Actualmente la ferretería administra:
 
 ---
 
-# Solución Propuesta (TO-BE)
+# Solución Propuesta 
 
 Se desarrolló una plataforma basada en microservicios que permite:
 
