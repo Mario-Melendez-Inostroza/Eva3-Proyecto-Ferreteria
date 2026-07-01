@@ -10,11 +10,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * BFF controller exposing a simple health check endpoint used to verify that
+ * the BFF application is up and responding.
+ */
 @RestController
 @Tag(name = "Health", description = "Endpoints related to health checks")
 @RequestMapping("/health")
 public class HealthController {
 
+    /**
+     * Returns the current health status of the BFF application.
+     *
+     * @return the health status
+     */
     @Operation(
             summary = "Check application health",
             description = "Returns the current health status of the BFF application."

@@ -1,0 +1,56 @@
+package com.ferreteria.msauth.dto;
+
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class RegisterRequestDtoValidationTest {
+
+    private static Validator validator;
+
+    @BeforeAll
+    static void setup() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    @Test
+    void shouldPassValidationForValidData() {
+        RegisterRequestDto dto = new RegisterRequestDto("usuario", "password123");
+
+        assertTrue(validator.validate(dto).isEmpty());
+    }
+
+    @Test
+    void shouldFailValidationWhenPasswordIsTooShort() {
+        RegisterRequestDto dto = new RegisterRequestDto("usuario", "abc");
+
+        var violations = validator.validate(dto);
+        Set<String> fields = violations.stream().map(v -> v.getPropertyPath().toString()).collect(Collectors.toSet());
+
+        assertEquals(1, violations.size());
+        assertTrue(fields.contains("password"));
+    }
+
+    @Test
+    void shouldFailValidationForBlankFields() {
+        RegisterRequestDto dto = new RegisterRequestDto("", "");
+
+        var violations = validator.validate(dto);
+        Set<String> fields = violations.stream().map(v -> v.getPropertyPath().toString()).collect(Collectors.toSet());
+
+        assertFalse(violations.isEmpty());
+        assertEquals(2, fields.size());
+        assertTrue(fields.contains("username"));
+        assertTrue(fields.contains("password"));
+    }
+}

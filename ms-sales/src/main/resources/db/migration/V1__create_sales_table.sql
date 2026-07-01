@@ -1,5 +1,5 @@
 CREATE TABLE ventas (
-    id          UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID          DEFAULT gen_random_uuid() PRIMARY KEY,
     product_id  UUID          NOT NULL,
     cantidad    INTEGER       NOT NULL,
     precio_unit NUMERIC(10,2) NOT NULL,

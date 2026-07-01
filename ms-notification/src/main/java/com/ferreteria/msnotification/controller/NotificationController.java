@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller exposing creation and querying of internal system
+ * notifications (e.g. low stock alerts or new sale records) for the
+ * notification microservice.
+ */
 @RestController
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
@@ -24,6 +29,12 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    /**
+     * Creates a notification.
+     *
+     * @param dto the notification data to create
+     * @return the created notification with HTTP 201 status
+     */
     @Operation(
             summary = "Create notification",
             description = "Creates a notification. This endpoint is used internally by the sales service.",
@@ -42,6 +53,11 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(notificationService.crear(dto));
     }
 
+    /**
+     * Lists all notifications.
+     *
+     * @return every notification registered in the system
+     */
     @Operation(
             summary = "List notifications",
             description = "Returns all notifications."
@@ -55,6 +71,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.listarTodas());
     }
 
+    /**
+     * Lists notifications that have not been marked as read.
+     *
+     * @return every unread notification
+     */
     @Operation(
             summary = "List unread notifications",
             description = "Returns notifications that have not been marked as read."
@@ -68,6 +89,12 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.listarNoLeidas());
     }
 
+    /**
+     * Lists notifications matching a given type (e.g. low stock, sale registered).
+     *
+     * @param tipo the notification type to filter by
+     * @return the notifications matching the provided type
+     */
     @Operation(
             summary = "List notifications by type",
             description = "Returns notifications matching the provided notification type."
@@ -84,6 +111,12 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.listarPorTipo(tipo));
     }
 
+    /**
+     * Marks a single notification as read.
+     *
+     * @param id the unique identifier of the notification to mark as read
+     * @return the updated notification
+     */
     @Operation(
             summary = "Mark notification as read",
             description = "Marks the notification identified by the provided ID as read."
@@ -101,6 +134,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.marcarLeida(id));
     }
 
+    /**
+     * Marks every unread notification as read.
+     *
+     * @return a confirmation message with the number of notifications updated
+     */
     @Operation(
             summary = "Mark all notifications as read",
             description = "Marks every unread notification as read."

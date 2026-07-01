@@ -10,6 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Default {@link AuthService} implementation backed by {@link UserRepository}
+ * for persistence, {@link PasswordEncoder} for password hashing, and
+ * {@link JwtUtil} for token generation and validation.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {

@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * BFF controller exposing product management endpoints to the frontend,
+ * delegating all operations to the product microservice through
+ * {@link ProductBffService}.
+ */
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -24,6 +29,11 @@ public class ProductController {
 
     private final ProductBffService productBffService;
 
+    /**
+     * Returns all products available through the product service.
+     *
+     * @return the list of products
+     */
     @Operation(
             summary = "List products",
             description = "Returns all products available through the product service."
@@ -38,6 +48,12 @@ public class ProductController {
         return ResponseEntity.ok(productBffService.findAll());
     }
 
+    /**
+     * Returns a product that matches the provided product identifier.
+     *
+     * @param id the product unique identifier
+     * @return the matching product
+     */
     @Operation(
             summary = "Find product by ID",
             description = "Returns a product that matches the provided product identifier."
@@ -56,6 +72,12 @@ public class ProductController {
         return ResponseEntity.ok(productBffService.findById(id));
     }
 
+    /**
+     * Returns products whose names match the provided search value.
+     *
+     * @param name the product name search value
+     * @return the list of matching products
+     */
     @Operation(
             summary = "Search products by name",
             description = "Returns products whose names match the provided search value."
@@ -73,6 +95,12 @@ public class ProductController {
         return ResponseEntity.ok(productBffService.findByName(name));
     }
 
+    /**
+     * Returns products that belong to the provided category.
+     *
+     * @param category the product category
+     * @return the list of matching products
+     */
     @Operation(
             summary = "Search products by category",
             description = "Returns products that belong to the provided category."
@@ -90,6 +118,12 @@ public class ProductController {
         return ResponseEntity.ok(productBffService.findByCategory(category));
     }
 
+    /**
+     * Creates a new product.
+     *
+     * @param dto the product data to create
+     * @return the created product with HTTP 201 status
+     */
     @Operation(
             summary = "Create product",
             description = "Creates a new product by forwarding the request to the product service.",
@@ -110,6 +144,13 @@ public class ProductController {
                 .body(productBffService.create(dto));
     }
 
+    /**
+     * Updates an existing product identified by the provided product ID.
+     *
+     * @param id the product unique identifier
+     * @param dto the updated product data
+     * @return the updated product
+     */
     @Operation(
             summary = "Update product",
             description = "Updates an existing product identified by the provided product ID.",
@@ -133,6 +174,12 @@ public class ProductController {
         return ResponseEntity.ok(productBffService.update(id, dto));
     }
 
+    /**
+     * Deactivates a product identified by the provided product ID.
+     *
+     * @param id the product unique identifier
+     * @return a confirmation message
+     */
     @Operation(
             summary = "Deactivate product",
             description = "Deactivates a product identified by the provided product ID."

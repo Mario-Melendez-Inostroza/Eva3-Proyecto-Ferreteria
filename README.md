@@ -732,6 +732,75 @@ Permite visualizar alertas generadas por el sistema.
 
 ---
 
+
+# Ejecución de Pruebas
+
+Cada microservicio (bff, ms-auth, ms-product, ms-inventory, ms-sales, ms-notification) incluye su propia suite de pruebas y su propio wrapper de Gradle.
+
+Para ejecutar las pruebas de un microservicio, ubicarse en su carpeta y ejecutar:
+
+```bash
+./gradlew.bat clean test
+```
+
+Ejemplo:
+
+```bash
+cd ms-auth
+./gradlew.bat clean test
+```
+
+Este comando se debe repetir dentro de cada carpeta de microservicio (`bff`, `ms-auth`, `ms-product`, `ms-inventory`, `ms-sales`, `ms-notification`) para validar el proyecto completo.
+
+---
+
+# Tipos de Pruebas
+
+El proyecto implementa distintos niveles de pruebas siguiendo la arquitectura por capas de cada microservicio:
+
+- **ApplicationTests:** Verifica que el contexto de Spring Boot de la aplicación cargue correctamente.
+- **ControllerTest:** Prueba los endpoints REST de la capa de controladores, validando códigos de respuesta y contratos de entrada/salida.
+- **ServiceTest:** Prueba la lógica de negocio de la capa de servicios de forma aislada, utilizando mocks para sus dependencias.
+- **RepositoryTest:** Prueba la capa de persistencia (JPA Repositories) contra una base de datos real en memoria.
+- **DTO ValidationTest:** Prueba las validaciones de los DTOs de entrada (anotaciones de Bean Validation).
+
+---
+
+# Cobertura de Código
+
+El proyecto utiliza **JaCoCo** para medir la cobertura de código de las pruebas en cada microservicio.
+
+Al ejecutar `./gradlew.bat clean test`, JaCoCo genera automáticamente el reporte de cobertura.
+
+Los reportes HTML se generan en la siguiente ruta dentro de cada microservicio:
+
+```
+build/reports/jacoco/test/html/index.html
+```
+
+---
+
+# Tecnologías de Testing
+
+- JUnit 5
+- Mockito
+- Spring Boot Test
+- H2 (base de datos en memoria para pruebas)
+- Flyway (migraciones de base de datos en entorno de pruebas)
+- JaCoCo (cobertura de código)
+
+---
+
+# Arquitectura de Testing
+
+Las pruebas siguen la misma separación por capas que la arquitectura de cada microservicio:
+
+- **ControllerTest** valida la capa REST de forma aislada, simulando las solicitudes HTTP y verificando las respuestas, delegando la lógica de negocio a mocks de la capa de servicios.
+- **ServiceTest** valida la lógica de negocio de forma aislada, utilizando Mockito para simular las dependencias (repositorios y clientes externos).
+- **RepositoryTest** valida la capa de persistencia ejecutando las pruebas contra una base de datos **H2** en memoria, sobre la cual **Flyway** aplica las migraciones definidas para el esquema de cada microservicio, garantizando que las pruebas reflejen la estructura real de la base de datos.
+
+De esta forma, cada capa se prueba de manera independiente, manteniendo bajo acoplamiento entre las pruebas y permitiendo detectar errores en el nivel correspondiente de la arquitectura.
+
 # Conclusión
 
 La implementación del Sistema de Gestión Integral para Ferretería representa una modernización significativa de los procesos operativos del negocio. La migración desde registros manuales en papel hacia una plataforma digital permite mejorar la eficiencia, reducir errores humanos y aumentar la disponibilidad de información crítica para la toma de decisiones.
@@ -741,3 +810,5 @@ La adopción de una arquitectura basada en microservicios facilita la separació
 El uso de Docker simplifica el despliegue y la portabilidad de la solución, mientras que Swagger proporciona documentación interactiva que facilita las pruebas y el mantenimiento de las APIs. Adicionalmente, la estrategia Database per Service mejora la independencia de los microservicios y fortalece la escalabilidad del sistema.
 
 En conjunto, la solución desarrollada permite transformar un proceso tradicional basado en papel en una plataforma tecnológica moderna, capaz de mejorar la gestión del inventario, automatizar ventas, generar alertas oportunas y proporcionar una base sólida para futuras mejoras y crecimiento del negocio.
+
+---

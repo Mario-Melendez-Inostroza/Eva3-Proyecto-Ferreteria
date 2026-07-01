@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller exposing operations to browse, create, update, and
+ * deactivate products in the hardware store catalog.
+ */
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -24,6 +28,11 @@ public class ProductController {
 
     private final ProductService productService;
 
+    /**
+     * Lists all active products in the catalog.
+     *
+     * @return the list of active products
+     */
     @Operation(
             summary = "List active products",
             description = "Returns all active products in the catalog."
@@ -37,6 +46,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.listarActivos());
     }
 
+    /**
+     * Finds a product by its unique identifier.
+     *
+     * @param id the product unique identifier
+     * @return the matching product
+     */
     @Operation(
             summary = "Find product by ID",
             description = "Returns product information using its unique identifier."
@@ -54,6 +69,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.buscarPorId(id));
     }
 
+    /**
+     * Searches active products whose names contain the given value.
+     *
+     * @param nombre the product name search value
+     * @return the list of matching active products
+     */
     @Operation(
             summary = "Search products by name",
             description = "Returns active products whose names contain the provided value."
@@ -70,6 +91,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.buscarPorNombre(nombre));
     }
 
+    /**
+     * Searches active products belonging to the given category.
+     *
+     * @param categoria the product category
+     * @return the list of matching active products
+     */
     @Operation(
             summary = "Search products by category",
             description = "Returns active products that belong to the provided category."
@@ -86,6 +113,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.buscarPorCategoria(categoria));
     }
 
+    /**
+     * Creates a new product in the catalog.
+     *
+     * @param dto the product data to create
+     * @return the newly created product
+     */
     @Operation(
             summary = "Create product",
             description = "Registers a new product in the catalog.",
@@ -104,6 +137,13 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.crear(dto));
     }
 
+    /**
+     * Updates an existing product identified by its unique identifier.
+     *
+     * @param id  the product unique identifier
+     * @param dto the updated product data
+     * @return the updated product
+     */
     @Operation(
             summary = "Update product",
             description = "Updates an existing product by its unique identifier.",
@@ -126,6 +166,13 @@ public class ProductController {
         return ResponseEntity.ok(productService.actualizar(id, dto));
     }
 
+    /**
+     * Deactivates an existing product by its unique identifier. This is a
+     * soft delete: the record is not physically removed from the catalog.
+     *
+     * @param id the product unique identifier
+     * @return a confirmation message
+     */
     @Operation(
             summary = "Deactivate product",
             description = "Marks an existing product as inactive by its unique identifier."

@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Default {@link ProductService} implementation backed by
+ * {@link ProductRepository} for persistence of the product catalog.
+ */
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {

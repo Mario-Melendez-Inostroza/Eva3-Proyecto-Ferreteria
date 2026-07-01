@@ -16,6 +16,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Default {@link VentaService} implementation backed by {@link VentaRepository}
+ * for persistence, and orchestrating {@link ProductClient} for product
+ * validation, {@link InventoryClient} for stock updates, and
+ * {@link NotificationClient} for best-effort sale and low-stock
+ * notifications.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

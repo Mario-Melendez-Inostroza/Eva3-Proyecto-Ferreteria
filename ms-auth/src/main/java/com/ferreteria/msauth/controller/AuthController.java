@@ -12,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller exposing user registration, login, and JWT token validation
+ * for the authentication microservice.
+ */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -20,6 +24,12 @@ public class AuthController {
 
     private final AuthService authService;
 
+    /**
+     * Registers a new user account.
+     *
+     * @param dto the username and password to register
+     * @return a confirmation message with HTTP 201 status
+     */
     @Operation(
             summary = "Register user",
             description = "Creates a new user account in the authentication service.",

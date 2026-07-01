@@ -66,5 +66,9 @@ public class GlobalExceptionHandler {
                 "status", ex.getStatusCode().value(),
                 "message", ex.getStatusText()
         );
+
+       
+
+        
     }
 }

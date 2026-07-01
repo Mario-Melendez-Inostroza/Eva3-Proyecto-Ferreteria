@@ -1,5 +1,5 @@
 CREATE TABLE notifications (
-    id          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
     tipo        VARCHAR(50)  NOT NULL,
     mensaje     TEXT         NOT NULL,
     product_id  UUID,

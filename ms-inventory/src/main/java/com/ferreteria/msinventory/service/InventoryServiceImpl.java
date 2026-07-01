@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Default {@link InventoryService} implementation backed by
+ * {@link InventoryRepository} for persistence.
+ */
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {

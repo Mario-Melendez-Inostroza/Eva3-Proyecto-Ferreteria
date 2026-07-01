@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * BFF controller exposing notification management endpoints to the frontend,
+ * delegating all operations to the notification microservice through
+ * {@link NotificationBffService}.
+ */
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -22,6 +27,11 @@ public class NotificationController {
 
     private final NotificationBffService notificationBffService;
 
+    /**
+     * Returns all notifications.
+     *
+     * @return the list of notifications
+     */
     @Operation(
             summary = "List notifications",
             description = "Returns all notifications."
@@ -36,6 +46,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationBffService.findAll());
     }
 
+    /**
+     * Returns notifications that have not been marked as read.
+     *
+     * @return the list of unread notifications
+     */
     @Operation(
             summary = "List unread notifications",
             description = "Returns notifications that have not been marked as read."
@@ -50,6 +65,12 @@ public class NotificationController {
         return ResponseEntity.ok(notificationBffService.findUnread());
     }
 
+    /**
+     * Marks the notification identified by the provided ID as read.
+     *
+     * @param id the notification unique identifier
+     * @return the updated notification
+     */
     @Operation(
             summary = "Mark notification as read",
             description = "Marks the notification identified by the provided ID as read."
@@ -68,6 +89,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationBffService.markAsRead(id));
     }
 
+    /**
+     * Marks every unread notification as read.
+     *
+     * @return a confirmation message
+     */
     @Operation(
             summary = "Mark all notifications as read",
             description = "Marks every unread notification as read."

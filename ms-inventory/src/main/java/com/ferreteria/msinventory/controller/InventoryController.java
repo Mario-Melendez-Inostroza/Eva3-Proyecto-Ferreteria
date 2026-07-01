@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller exposing inventory management for products, including
+ * stock queries and stock adjustments per warehouse.
+ */
 @RestController
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
@@ -24,6 +28,12 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    /**
+     * Creates an inventory record for a product.
+     *
+     * @param dto the inventory data to create
+     * @return the created inventory record with HTTP 201 status
+     */
     @Operation(
             summary = "Create inventory record",
             description = "Creates an inventory record for a product.",
@@ -42,6 +52,11 @@ public class InventoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.crear(dto));
     }
 
+    /**
+     * Lists all inventory records.
+     *
+     * @return the list of all inventory records
+     */
     @Operation(
             summary = "List inventory",
             description = "Returns all inventory records."
@@ -55,6 +70,11 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.listarTodo());
     }
 
+    /**
+     * Lists inventory records whose stock has fallen below the configured minimum.
+     *
+     * @return the list of low stock inventory records
+     */
     @Operation(
             summary = "List low stock inventory",
             description = "Returns inventory records where stock is below the configured minimum."
@@ -68,6 +88,12 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.listarStockBajo());
     }
 
+    /**
+     * Finds the inventory record associated with a product.
+     *
+     * @param productId the product unique identifier
+     * @return the matching inventory record
+     */
     @Operation(
             summary = "Find inventory by product",
             description = "Returns the inventory record associated with the provided product ID."
@@ -85,6 +111,13 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.buscarPorProductId(productId));
     }
 
+    /**
+     * Increases stock for the product identified by the provided product ID.
+     *
+     * @param productId the product unique identifier
+     * @param dto the stock amount to add
+     * @return the updated inventory record
+     */
     @Operation(
             summary = "Add stock",
             description = "Increases stock for the product identified by the provided product ID.",
@@ -107,6 +140,14 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.agregarStock(productId, dto));
     }
 
+    /**
+     * Decreases stock for the product identified by the provided product ID.
+     * Rejects the operation if it would leave the stock in a negative value.
+     *
+     * @param productId the product unique identifier
+     * @param dto the stock amount to subtract
+     * @return the updated inventory record
+     */
     @Operation(
             summary = "Subtract stock",
             description = "Decreases stock for the product identified by the provided product ID.",

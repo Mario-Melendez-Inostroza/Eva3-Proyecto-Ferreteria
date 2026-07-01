@@ -1,5 +1,14 @@
 package com.ferreteria.bff;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 @SpringBootTest
-class BffApplicationTests { @Test void contextLoads() {} }
+@ActiveProfiles("test")
+class BffApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+}

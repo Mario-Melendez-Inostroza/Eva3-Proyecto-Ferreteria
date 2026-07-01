@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * BFF controller exposing sales management endpoints to the frontend,
+ * delegating all operations to the sales microservice through
+ * {@link SalesBffService}.
+ */
 @RestController
 @RequestMapping("/api/sales")
 @RequiredArgsConstructor
@@ -24,6 +29,12 @@ public class SalesController {
 
     private final SalesBffService salesBffService;
 
+    /**
+     * Registers a new sale.
+     *
+     * @param dto the sale data to register
+     * @return the registered sale with HTTP 201 status
+     */
     @Operation(
             summary = "Register sale",
             description = "Registers a new sale by forwarding the request to the sales service.",
@@ -44,6 +55,11 @@ public class SalesController {
                 .body(salesBffService.register(dto));
     }
 
+    /**
+     * Returns all registered sales.
+     *
+     * @return the list of sales
+     */
     @Operation(
             summary = "List sales",
             description = "Returns all registered sales."
@@ -58,6 +74,12 @@ public class SalesController {
         return ResponseEntity.ok(salesBffService.findAll());
     }
 
+    /**
+     * Returns a sale that matches the provided sale identifier.
+     *
+     * @param id the sale unique identifier
+     * @return the matching sale
+     */
     @Operation(
             summary = "Find sale by ID",
             description = "Returns a sale that matches the provided sale identifier."
@@ -76,6 +98,12 @@ public class SalesController {
         return ResponseEntity.ok(salesBffService.findById(id));
     }
 
+    /**
+     * Returns sales associated with the provided product ID.
+     *
+     * @param productId the product unique identifier
+     * @return the list of matching sales
+     */
     @Operation(
             summary = "List sales by product",
             description = "Returns sales associated with the provided product ID."
@@ -93,6 +121,11 @@ public class SalesController {
         return ResponseEntity.ok(salesBffService.findByProduct(productId));
     }
 
+    /**
+     * Returns the total number of sales and the accumulated sales amount.
+     *
+     * @return the sales summary
+     */
     @Operation(
             summary = "Get sales summary",
             description = "Returns the total number of sales and the accumulated sales amount."

@@ -1,5 +1,14 @@
 package com.ferreteria.msauth;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 @SpringBootTest
-class MsAuthApplicationTests { @Test void contextLoads() {} }
+@ActiveProfiles("test")
+class MsAuthApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+}

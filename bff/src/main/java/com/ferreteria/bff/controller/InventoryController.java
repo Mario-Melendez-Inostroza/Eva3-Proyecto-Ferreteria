@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * BFF controller exposing inventory management endpoints to the frontend,
+ * delegating all operations to the inventory microservice through
+ * {@link InventoryBffService}.
+ */
 @RestController
 @RequestMapping("/api/inventory")
 @RequiredArgsConstructor
@@ -24,6 +29,12 @@ public class InventoryController {
 
     private final InventoryBffService inventoryBffService;
 
+    /**
+     * Creates an inventory record for a product.
+     *
+     * @param dto the inventory data to create
+     * @return the created inventory record with HTTP 201 status
+     */
     @Operation(
             summary = "Create inventory record",
             description = "Creates an inventory record for a product.",
@@ -44,6 +55,11 @@ public class InventoryController {
                 .body(inventoryBffService.create(dto));
     }
 
+    /**
+     * Returns all inventory records.
+     *
+     * @return the list of inventory records
+     */
     @Operation(
             summary = "List inventory",
             description = "Returns all inventory records."
@@ -58,6 +74,11 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryBffService.findAll());
     }
 
+    /**
+     * Returns inventory records where stock is below the configured minimum.
+     *
+     * @return the list of low stock inventory records
+     */
     @Operation(
             summary = "List low stock inventory",
             description = "Returns inventory records where stock is below the configured minimum."
@@ -72,6 +93,12 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryBffService.findLowStock());
     }
 
+    /**
+     * Returns the inventory record associated with the provided product ID.
+     *
+     * @param productId the product unique identifier
+     * @return the matching inventory record
+     */
     @Operation(
             summary = "Find inventory by product",
             description = "Returns the inventory record associated with the provided product ID."
@@ -90,6 +117,13 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryBffService.findByProduct(productId));
     }
 
+    /**
+     * Increases stock for the product identified by the provided product ID.
+     *
+     * @param productId the product unique identifier
+     * @param dto the stock amount to add
+     * @return the updated inventory record
+     */
     @Operation(
             summary = "Add stock",
             description = "Increases stock for the product identified by the provided product ID.",
@@ -113,6 +147,13 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryBffService.addStock(productId, dto));
     }
 
+    /**
+     * Decreases stock for the product identified by the provided product ID.
+     *
+     * @param productId the product unique identifier
+     * @param dto the stock amount to subtract
+     * @return the updated inventory record
+     */
     @Operation(
             summary = "Subtract stock",
             description = "Decreases stock for the product identified by the provided product ID.",
